@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minuta Inteligente - Dirección de Administración</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary: #4776E6;
+            --secondary: #8E54E9;
+            --success: #00b09b;
+            --success-dark: #96c93d;
+            --warning: #f2994a;
+            --danger: #e74c3c;
+            --info: #3498db;
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f6f8fd 0%, #f1f5f9 100%);
+            color: var(--text-main);
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Agregar Invitado */
+        .add-guest-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .add-guest-bar input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+        }
+
+        .btn-guest {
+            background: var(--info);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            transition: opacity 0.3s;
+        }
+
+        .btn-guest:hover {
+            opacity: 0.8;
+        }
+
+        /* Cuadrícula de Asistencia */
+        .attendance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .attendance-grid label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+
+        .attendance-grid label:hover {
+            background: #e2e8f0;
+        }
+
+        .attendance-grid input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        select, input[type="text"], textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            box-sizing: border-box;
+            background-color: #f8fafc;
+        }
+
+        textarea { height: 100px; resize: vertical; margin-bottom: 15px; }
+
+        .btn-group-main {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-add { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; flex: 1; }
+        .btn-cancel { background: #e2e8f0; color: var(--text-main); display: none; }
+        .btn-finish { background: linear-gradient(135deg, var(--success), var(--success-dark)); color: white; width: 100%; padding: 15px; margin-top: 10px; }
+        
+        .export-bar { display: flex; gap: 10px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
+        .btn-export { background: #e2e8f0; color: #2d3748; padding: 10px 20px; font-size: 14px; }
+        .btn-export.pdf { background: #e74c3c; color: white; }
+        .btn-export.excel { background: #27ae60; color: white; }
+        .btn-clear { background: var(--text-muted); color: white; padding: 10px 20px; font-size: 14px; margin-left: auto;}
+
+        .log-container { max-height: 250px; overflow-y: auto; padding-right: 10px; }
+        .log-item { background: #f8fafc; border-left: 4px solid var(--text-muted); padding: 12px 15px; margin-bottom: 10px; border-radius: 0 8px 8px 0; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+        .tipo-Acuerdo { border-left-color: var(--success); background: #f0fdf4; }
+        .tipo-Pendiente { border-left-color: var(--warning); background: #fffbeb; }
+        .tipo-Comentario { border-left-color: var(--primary); background: #eff6ff; }
+
+        .action-btns button { padding: 5px 8px; font-size: 12px; border-radius: 5px; margin-left: 5px; }
+        .btn-edit { background: #f1c40f; color: #fff; }
+        .btn-delete { background: var(--danger); color: #fff; }
+
+        #resultadoMinuta { display: none; }
+        
+        .proyecto-resumen { margin-bottom: 30px; background: #fff; border-radius: 10px; padding: 20px; border: 1px solid #e2e8f0; }
+        .proyecto-resumen h3 { color: var(--secondary); border-bottom: 2px dashed #e2e8f0; padding-bottom: 10px; }
+        .seccion-minuta h4 { color: var(--text-muted); text-transform: uppercase; font-size: 0.9rem; margin-bottom: 10px; }
+        .lista-inteligente li { margin-bottom: 10px; font-size: 14px; display: flex; align-items: flex-start; gap: 8px; }
+        
+        .badge-participante { font-weight: 600; background: #e2e8f0; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; white-space: nowrap;}
+        
+        .badge-estatus { font-weight: 600; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; color: white; white-space: nowrap; }
+        .bg-nuevo { background-color: var(--info); }
+        .bg-proceso { background-color: var(--warning); }
+        .bg-terminado { background-color: var(--success); }
+        .bg-cancelado { background-color: var(--danger); }
+        .bg-informativo { background-color: var(--text-muted); }
+
+        #listaPresentes { margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; font-size: 14px; border-left: 4px solid var(--primary); }
+    </style>
+</head>
+<body>
+
+    <h1>✨ Asistente de Minutas Inteligente</h1>
+
+    <div class="card">
+        <h2>👥 Control de Asistencia</h2>
+        <div class="add-guest-bar">
+            <input type="text" id="nombreInvitado" placeholder="Escribe el nombre de un invitado externo...">
+            <button class="btn-guest" onclick="agregarInvitado()">➕ Agregar a la sesión</button>
+        </div>
+        <div class="attendance-grid" id="contenedorAsistencia">
+            <label><input type="checkbox" value="Ángel Romero" class="check-asistencia"> Ángel Romero</label>
+            <label><input type="checkbox" value="Carlos Rojo" class="check-asistencia"> Carlos Rojo</label>
+            <label><input type="checkbox" value="Jéssica Victoria" class="check-asistencia"> Jéssica Victoria</label>
+            <label><input type="checkbox" value="Liliana Zavala" class="check-asistencia"> Liliana Zavala</label>
+            <label><input type="checkbox" value="María Robles" class="check-asistencia"> María Robles</label>
+            <label><input type="checkbox" value="Misael López" class="check-asistencia"> Misael López</label>
+            <label><input type="checkbox" value="Nadia Blanco" class="check-asistencia"> Nadia Blanco</label>
+            <label><input type="checkbox" value="Rubén Martínez" class="check-asistencia"> Rubén Martínez</label>
+            <label><input type="checkbox" value="Sarahí Palomera" class="check-asistencia"> Sarahí Palomera</label>
+            <label><input type="checkbox" value="Víctor Hugo" class="check-asistencia"> Víctor Hugo</label>
+            <label><input type="checkbox" value="Wendy Felix" class="check-asistencia"> Wendy Felix</label>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>⚡ Captura Rápida</h2>
+        <div class="grid-4">
+            <select id="participante">
+                <option value="">👤 ¿Quién habla?</option>
+                <option value="Ángel Romero">Ángel Romero</option>
+                <option value="Carlos Rojo">Carlos Rojo</option>
+                <option value="Jéssica Victoria">Jéssica Victoria</option>
+                <option value="Liliana Zavala">Liliana Zavala</option>
+                <option value="María Robles">María Robles</option>
+                <option value="Misael López">Misael López</option>
+                <option value="Nadia Blanco">Nadia Blanco</option>
+                <option value="Rubén Martínez">Rubén Martínez</option>
+                <option value="Sarahí Palomera">Sarahí Palomera</option>
+                <option value="Víctor Hugo">Víctor Hugo</option>
+                <option value="Wendy Felix">Wendy Felix</option>
+            </select>
+            <input type="text" id="proyecto" placeholder="📁 Tema / Proyecto">
+            <select id="tipoNota">
+                <option value="Comentario">💬 Comentario / Contexto</option>
+                <option value="Acuerdo">✅ Acuerdo Tomado</option>
+                <option value="Pendiente">📌 Tarea / Pendiente</option>
+            </select>
+            <select id="estatus">
+                <option value="Nuevo">🆕 Nuevo</option>
+                <option value="En proceso">⏳ En proceso</option>
+                <option value="Terminado">✅ Terminado</option>
+                <option value="Cancelado">🚫 Cancelado</option>
+                <option value="Informativo">ℹ️ Informativo</option>
+            </select>
+        </div>
+        <textarea id="comentario" placeholder="Escribe aquí los detalles... (Presiona Enter para guardar)"></textarea>
+        
+        <div class="btn-group-main">
+            <button class="btn-add" id="btnGuardar" onclick="guardarNota()">➕ Registrar en la sesión</button>
+            <button class="btn-cancel" id="btnCancelar" onclick="cancelarEdicion()">❌ Cancelar</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>⏱️ Flujo de la Reunión</h2>
+        <div class="log-container" id="historial">
+            <div style="text-align:center; color:#718096; padding:20px;">La sesión está lista. Comienza a registrar notas.</div>
+        </div>
+        <button class="btn-finish" onclick="generarMinuta()">📄 Analizar y Generar Minuta Estructurada</button>
+    </div>
+
+    <div class="card" id="resultadoMinuta">
+        <div class="export-bar">
+            <button class="btn-export excel" onclick="descargarExcel()">📊 Descargar Excel</button>
+            <button class="btn-export pdf" onclick="descargarPDF()">📕 Descargar PDF</button>
+            <button class="btn-clear" onclick="limpiarSesion()">🧹 Limpiar Sesión Nueva</button>
+        </div>
+        
+        <div id="areaImpresion">
+            <h2 style="color: #4776E6;">📊 Resumen Ejecutivo - Dirección de Administración</h2>
+            <p style="color: #718096; font-size: 14px; margin-bottom: 5px;" id="fechaGeneracion"></p>
+            
+            <div id="listaPresentes"></div>
+            <div id="contenidoMinuta"></div>
+        </div>
+    </div>
+
+    <script>
+        let notas = [];
+        let idEditando = null;
+
+        // Atajo Enter para el invitado
+        document.getElementById('nombreInvitado').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                agregarInvitado();
+            }
+        });
+
+        // Atajo Enter para notas
+        document.getElementById('comentario').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                guardarNota();
+            }
+        });
+
+        function agregarInvitado() {
+            const nombre = document.getElementById('nombreInvitado').value.trim();
+            if (!nombre) {
+                alert('Escribe el nombre del invitado primero.');
+                return;
+            }
+
+            // 1. Agregar a Asistencia
+            const contenedorAsistencia = document.getElementById('contenedorAsistencia');
+            const label = document.createElement('label');
+            label.className = "invitado-agregado"; // Para poder limpiarlo después
+            label.innerHTML = `<input type="checkbox" value="${nombre}" class="check-asistencia" checked> ${nombre}`;
+            contenedorAsistencia.appendChild(label);
+
+            // 2. Agregar a Select de Participantes
+            const selectParticipante = document.getElementById('participante');
+            const option = document.createElement('option');
+            option.value = nombre;
+            option.text = nombre;
+            option.className = "opcion-invitado"; // Para limpiarlo después
+            selectParticipante.appendChild(option);
+
+            // Seleccionarlo automáticamente para hablar y limpiar campo
+            selectParticipante.value = nombre;
+            document.getElementById('nombreInvitado').value = '';
+        }
+
+        function obtenerClaseEstatus(estatus) {
+            switch(estatus) {
+                case 'Nuevo': return 'bg-nuevo';
+                case 'En proceso': return 'bg-proceso';
+                case 'Terminado': return 'bg-terminado';
+                case 'Cancelado': return 'bg-cancelado';
+                default: return 'bg-informativo';
+            }
+        }
+
+        function guardarNota() {
+            const participante = document.getElementById('participante').value;
+            const proyecto = document.getElementById('proyecto').value.trim() || 'Temas Generales';
+            const tipoNota = document.getElementById('tipoNota').value;
+            const estatus = document.getElementById('estatus').value;
+            const comentario = document.getElementById('comentario').value.trim();
+
+            if (!participante || !comentario) {
+                alert('Falta seleccionar quién habla o escribir el comentario.');
+                return;
+            }
+
+            if (idEditando !== null) {
+                const index = notas.findIndex(n => n.id === idEditando);
+                if (index !== -1) {
+                    notas[index] = { ...notas[index], participante, proyecto, tipoNota, estatus, comentario };
+                }
+                cancelarEdicion();
+            } else {
+                notas.push({
+                    id: Date.now(),
+                    participante, proyecto, tipoNota, estatus, comentario,
+                    hora: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                });
+                document.getElementById('comentario').value = '';
+                document.getElementById('comentario').focus();
+            }
+            actualizarHistorial();
+        }
+
+        function editarNota(id) {
+            const nota = notas.find(n => n.id === id);
+            if (nota) {
+                document.getElementById('participante').value = nota.participante;
+                document.getElementById('proyecto').value = nota.proyecto;
+                document.getElementById('tipoNota').value = nota.tipoNota;
+                document.getElementById('estatus').value = nota.estatus;
+                document.getElementById('comentario').value = nota.comentario;
+                
+                idEditando = id;
+                document.getElementById('btnGuardar').innerHTML = "💾 Guardar Cambios";
+                document.getElementById('btnCancelar').style.display = "block";
+                document.getElementById('comentario').focus();
+            }
+        }
+
+        function cancelarEdicion() {
+            idEditando = null;
+            document.getElementById('btnGuardar').innerHTML = "➕ Registrar en la sesión";
+            document.getElementById('btnCancelar').style.display = "none";
+            document.getElementById('comentario').value = '';
+        }
+
+        function eliminarNota(id) {
+            if(confirm('¿Estás seguro de eliminar esta nota?')) {
+                notas = notas.filter(n => n.id !== id);
+                actualizarHistorial();
+            }
+        }
+
+        function actualizarHistorial() {
+            const contenedor = document.getElementById('historial');
+            contenedor.innerHTML = ''; 
+
+            if (notas.length === 0) {
+                contenedor.innerHTML = '<div style="text-align:center; color:#718096; padding:20px;">Sesión vacía.</div>';
+                return;
+            }
+
+            const notasInvertidas = [...notas].reverse();
+
+            notasInvertidas.forEach(nota => {
+                const div = document.createElement('div');
+                div.className = `log-item tipo-${nota.tipoNota}`;
+                let icono = nota.tipoNota === 'Acuerdo' ? '✅' : (nota.tipoNota === 'Pendiente' ? '📌' : '💬');
+                let claseBadge = obtenerClaseEstatus(nota.estatus);
+
+                div.innerHTML = `
+                    <div>
+                        <strong>${nota.hora} - ${nota.participante}</strong> 
+                        <span style="color: #718096; font-size: 12px;">(Proyecto: ${nota.proyecto})</span>
+                        <span class="badge-estatus ${claseBadge}" style="margin-left: 5px;">${nota.estatus}</span><br>
+                        ${icono} <em>${nota.tipoNota}</em>: ${nota.comentario}
+                    </div>
+                    <div class="action-btns">
+                        <button class="btn-edit" onclick="editarNota(${nota.id})" title="Editar">✏️</button>
+                        <button class="btn-delete" onclick="eliminarNota(${nota.id})" title="Eliminar">🗑️</button>
+                    </div>
+                `;
+                contenedor.appendChild(div);
+            });
+        }
+
+        function obtenerAsistentes() {
+            const checkboxes = document.querySelectorAll('#contenedorAsistencia input[type="checkbox"]:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        function generarMinuta() {
+            if (notas.length === 0) { alert('No hay información para procesar.'); return; }
+
+            document.getElementById('fechaGeneracion').textContent = "Generado el: " + new Date().toLocaleDateString() + " a las " + new Date().toLocaleTimeString();
+            
+            const asistentes = obtenerAsistentes();
+            const contenedorPresentes = document.getElementById('listaPresentes');
+            if(asistentes.length > 0) {
+                contenedorPresentes.innerHTML = `<strong>👥 Asistentes:</strong> ${asistentes.join(', ')}`;
+                contenedorPresentes.style.display = "block";
+            } else {
+                contenedorPresentes.innerHTML = `<strong>👥 Asistentes:</strong> <em>No se registró asistencia</em>`;
+                contenedorPresentes.style.display = "block";
+            }
+
+            const contenido = document.getElementById('contenidoMinuta');
+            contenido.innerHTML = '';
+
+            const proyectos = notas.reduce((acc, nota) => {
+                const clave = nota.proyecto.toUpperCase(); 
+                if (!acc[clave]) acc[clave] = { nombre: nota.proyecto, acuerdos: [], pendientes: [], contexto: [] };
+                
+                if (nota.tipoNota === 'Acuerdo') acc[clave].acuerdos.push(nota);
+                else if (nota.tipoNota === 'Pendiente') acc[clave].pendientes.push(nota);
+                else acc[clave].contexto.push(nota);
+                return acc;
+            }, {});
+
+            for (const clave in proyectos) {
+                const proj = proyectos[clave];
+                const divProj = document.createElement('div');
+                divProj.className = 'proyecto-resumen';
+                let html = `<h3>📁 ${proj.nombre}</h3>`;
+
+                const generarItemHTML = (item) => {
+                    let claseBadge = obtenerClaseEstatus(item.estatus);
+                    return `<li>
+                                <span class="badge-estatus ${claseBadge}">${item.estatus}</span>
+                                <span class="badge-participante">${item.participante}</span> 
+                                <span>${item.comentario}</span>
+                            </li>`;
+                };
+
+                if (proj.acuerdos.length > 0) {
+                    html += `<div class="seccion-minuta"><h4>✅ Acuerdos Tomados</h4><ul class="lista-inteligente">
+                                ${proj.acuerdos.map(generarItemHTML).join('')}
+                            </ul></div>`;
+                }
+                if (proj.pendientes.length > 0) {
+                    html += `<div class="seccion-minuta"><h4>📌 Tareas y Pendientes</h4><ul class="lista-inteligente">
+                                ${proj.pendientes.map(generarItemHTML).join('')}
+                            </ul></div>`;
+                }
+                if (proj.contexto.length > 0) {
+                    html += `<div class="seccion-minuta"><h4>💬 Contexto y Comentarios</h4><ul class="lista-inteligente">
+                                ${proj.contexto.map(generarItemHTML).join('')}
+                            </ul></div>`;
+                }
+                divProj.innerHTML = html;
+                contenido.appendChild(divProj);
+            }
+
+            document.getElementById('resultadoMinuta').style.display = 'block';
+            document.getElementById('resultadoMinuta').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function descargarPDF() {
+            const elemento = document.getElementById('areaImpresion');
+            const opciones = {
+                margin:       10,
+                filename:     'Minuta_Administracion.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opciones).from(elemento).save();
+        }
+
+        function descargarExcel() {
+            if (notas.length === 0) { alert("No hay datos para exportar"); return; }
+            
+            const asistentes = obtenerAsistentes();
+            let listaAsistencia = asistentes.length > 0 ? asistentes.join(', ') : 'Ninguno';
+
+            let tabla = "<table border='1'>";
+            tabla += `<tr><td colspan='6' style='background-color:#f8fafc;'><strong>Asistentes:</strong> ${listaAsistencia}</td></tr>`;
+            tabla += "<tr><th style='background-color:#4776E6; color:white;'>Hora</th><th style='background-color:#4776E6; color:white;'>Participante</th><th style='background-color:#4776E6; color:white;'>Proyecto/Tema</th><th style='background-color:#4776E6; color:white;'>Tipo</th><th style='background-color:#4776E6; color:white;'>Estatus</th><th style='background-color:#4776E6; color:white;'>Comentario</th></tr>";
+            
+            notas.forEach(n => {
+                tabla += `<tr><td>${n.hora}</td><td>${n.participante}</td><td>${n.proyecto}</td><td>${n.tipoNota}</td><td>${n.estatus}</td><td>${n.comentario}</td></tr>`;
+            });
+            tabla += "</table>";
+
+            let blob = new Blob(['\ufeff', tabla], { type: 'application/vnd.ms-excel' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = 'Minuta_Direccion_Administracion.xls';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function limpiarSesion() {
+            if(confirm('¿Seguro que deseas borrar toda la información de esta sesión para iniciar una nueva?')) {
+                // Reiniciar notas
+                notas = [];
+                actualizarHistorial();
+                
+                // Ocultar bloque de resultados
+                document.getElementById('resultadoMinuta').style.display = 'none';
+                
+                // Desmarcar checkboxes base
+                document.querySelectorAll('.check-asistencia').forEach(cb => cb.checked = false);
+                
+                // Eliminar invitados del DOM (asistencia y select)
+                document.querySelectorAll('.invitado-agregado').forEach(el => el.remove());
+                document.querySelectorAll('.opcion-invitado').forEach(el => el.remove());
+                
+                // Limpiar campos de texto
+                document.getElementById('proyecto').value = '';
+                document.getElementById('comentario').value = '';
+                document.getElementById('participante').value = '';
+                document.getElementById('tipoNota').value = 'Comentario';
+                document.getElementById('estatus').value = 'Nuevo';
+                
+                // Volver arriba
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>
